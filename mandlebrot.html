@@ -1,0 +1,121 @@
+</!DOCTYPE html>
+<html>
+
+<head>
+	<title></title>
+	<style type="text/css">
+		
+	#left 
+	{
+		float: left;
+		width: 75%;
+	}
+
+	#right
+	{
+		float: center;
+		padding: 20px;
+	}
+
+	</style>
+</head>
+
+
+
+<body>
+<div>
+	<div id="left">
+		<canvas id='graph' width="600" height="600"></canvas>
+	</div>
+
+	<div id="right">
+		<form id="input">
+			Pan left/right:<br>
+			<input id="x" type="text" name="pan_x" value="1.5"><br>
+			Pan up/down:<br>
+			<input id="y" type="text" name="pan_y" value="1.5"><br>
+			Zoom:<br>
+			<input id="z" type="text" name="zoom" value="200"><br>
+			Color:<br>
+			<input id="c" type="text" name="col" value="270"><br>
+		</form>
+		<button id="gen">Generate Frame</button>
+	</div>
+</div>
+
+</body>
+
+<script type="text/javascript">
+
+	let getNew = function(){
+
+		let x = document.getElementById("x").value;
+		let y = document.getElementById("y").value;
+		let z = document.getElementById("z").value;
+		let c = document.getElementById("c").value;
+
+		getFrame(parseFloat(x),parseFloat(y),parseFloat(z),parseFloat(c));
+
+	}
+	
+	let checkPoint = function(xc,yc,d){
+
+		let depth = 0;
+		let	x = 0;
+		let	y = 0;
+
+		while(x*x + y*y < 4 && depth < d){
+
+			let xt = x*x - y*y + xc; 
+			y = 2*x*y + yc;          
+			x = xt;
+
+			depth +=1;
+		}
+
+		if(depth == d){
+			return 0;
+		}
+		else{
+			return (depth/d * 100);
+		} 
+	}
+
+	let getFrame = function(x,y,z,c){
+
+		let cnvs = document.getElementById('graph');
+		let cxt = cnvs.getContext('2d');
+
+		cxt.fillStyle = '#FFFFFF';
+		cxt.fillRect(0,0,cnvs.width,cnvs.height);
+
+		for(let xc = 0; xc < cnvs.width; xc++){
+			for(let yc = 0; yc < cnvs.height; yc++){
+
+				let p = checkPoint(xc/z-x,yc/z-y,1000);
+
+				if(p !== 0){
+					cxt.fillStyle = `hsl(${c}, 100%, ${p}%)`;
+					cxt.fillRect(xc,yc,1,1);
+				}
+				else{
+					cxt.fillStyle = '#000000';
+					cxt.fillRect(xc,yc,1,1);
+				}
+			}
+		}
+	}
+
+	let clickHandler = function(evt){
+
+		let cnvs = document.getElementById('graph');
+		let box = cnvs.getBoundingClientRect();
+		let x = evt.clientX - box.left;
+		let y = evt.clientY - box.top;
+
+	}
+
+	getNew();
+	document.getElementById("gen").addEventListener("click", getNew);
+</script>
+</html>
